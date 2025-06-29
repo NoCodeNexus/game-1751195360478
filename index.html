@@ -1,0 +1,256 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sci-Fi Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-image: url('https://res.cloudinary.com/doa7uz2ml/image/upload/v1751195165/kmgqjf1gep0vdpajuwyg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: #00ff00;
+            margin: 0;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        /* Import Orbitron font */
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+        nav {
+            width: 100%;
+            background-color: rgba(0, 255, 0, 0.1);
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(5px); /* Add a blur effect */
+        }
+
+        nav a {
+            float: left;
+            display: block;
+            color: #00ff00;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        nav a:hover {
+            background-color: rgba(0, 255, 0, 0.3);
+            color: #000;
+        }
+
+        section {
+            margin-top: 60px; /* Adjust margin-top to account for fixed nav */
+            padding: 20px;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.5); /* Add a semi-transparent background */
+            border-radius: 10px;
+        }
+
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 120px);
+            grid-gap: 10px;
+            margin-top: 20px;
+        }
+
+        .cell {
+            width: 120px;
+            height: 120px;
+            background-color: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .cell:hover {
+            background-color: rgba(0, 255, 0, 0.3);
+            color: #000;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #00ff00;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            backdrop-filter: blur(5px); /* Add a blur effect */
+        }
+
+        /* Keyframes for glowing effect */
+        @keyframes glowing {
+            0% {
+                box-shadow: 0 0 5px #00ff00;
+            }
+            50% {
+                box-shadow: 0 0 20px #00ff00;
+            }
+            100% {
+                box-shadow: 0 0 5px #00ff00;
+            }
+        }
+
+        /* Apply glowing animation to cells */
+        .cell {
+            animation: glowing 2s infinite;
+        }
+
+        /* Style for X and O */
+        .X {
+            color: #ff00ff; /* Magenta for X */
+        }
+
+        .O {
+            color: #00ffff; /* Cyan for O */
+        }
+
+        /* Style for the reset button */
+        button {
+            background-color: rgba(0, 255, 0, 0.2);
+            color: #000;
+            padding: 10px 20px;
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1em;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        button:hover {
+            background-color: rgba(0, 255, 0, 0.5);
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#game">Game</a>
+        <a href="#about">About</a>
+    </nav>
+
+    <section id="home">
+        <h2>Welcome to Sci-Fi Tic Tac Toe!</h2>
+        <p>Engage in a futuristic battle of wits.</p>
+    </section>
+
+    <section id="game">
+        <h2>Play Sci-Fi Tic Tac Toe</h2>
+        <div id="game-board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        <div id="message"></div>
+        <button id="reset-button">Reset Game</button>
+    </section>
+
+    <section id="about">
+        <h2>About This Game</h2>
+        <p>A Sci-Fi themed Tic Tac Toe game created with HTML, CSS, and JavaScript.</p>
+    </section>
+
+    <footer>
+        &copy; 2024 Sci-Fi Tic Tac Toe
+    </footer>
+
+    <script>
+        const board = document.getElementById('game-board');
+        const cells = document.querySelectorAll('.cell');
+        const message = document.getElementById('message');
+        const resetButton = document.getElementById('reset-button');
+        let currentPlayer = 'X';
+        let gameBoard = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = true;
+
+        const winningCombinations = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        function handleCellClick(event) {
+            const cell = event.target;
+            const index = cell.dataset.index;
+
+            if (gameBoard[index] === '' && gameActive) {
+                gameBoard[index] = currentPlayer;
+                cell.textContent = currentPlayer;
+                cell.classList.add(currentPlayer);
+                checkWin();
+                switchPlayer();
+            }
+        }
+
+        function switchPlayer() {
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        }
+
+        function checkWin() {
+            for (let combination of winningCombinations) {
+                const [a, b, c] = combination;
+                if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                    message.textContent = `Player ${currentPlayer} wins!`;
+                    gameActive = false;
+                    return;
+                }
+            }
+
+            if (!gameBoard.includes('')) {
+                message.textContent = 'It\'s a draw!';
+                gameActive = false;
+            }
+        }
+
+        function resetGame() {
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            currentPlayer = 'X';
+            message.textContent = '';
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('X', 'O');
+            });
+        }
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+
+        resetButton.addEventListener('click', resetGame);
+    </script>
+
+</body>
+</html>
+```
